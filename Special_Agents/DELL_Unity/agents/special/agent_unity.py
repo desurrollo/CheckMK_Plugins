@@ -2,6 +2,7 @@
 
 import argparse
 import requests
+from ipaddress import ip_address
 
 ### MAIN FUNCTION ###
 # ARGUMENTS:
@@ -14,5 +15,25 @@ if __name__ == '__main__':
      parser.add_argument("-u", "--user", type=str, required=True, help="API user name")
      parser.add_argument("-p", "--password", type=str, required=True, help="API user password")
      args = parser.parse_args()
-     
-     print("<<<unity_api_status")
+
+     # "X-EMC-REST-CLIENT": "true" is mandatory
+     headers = {
+          "Accept": "application/json",
+          "Content-type": "application/json",
+          "X-EMC-REST-CLIENT": "true"
+     }
+
+     authentication = (args.user, args.password)
+
+     baseurl = "https://{}".format(args.ipaddr)
+     query = "/api/types/disk/instances"
+     parameters = "?compact=true"
+     url = baseurl + query + parameters
+
+     requests.packages.urllib3.disable_warnings()
+     req = requests.get(url, headers=headers, auth=authentication, verify=False)
+
+     print("<<<unity_api_status>>>")
+     print(req.status_code)
+     print(req.json()['entries'])
+
